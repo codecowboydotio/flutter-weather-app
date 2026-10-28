@@ -1,0 +1,24 @@
+name: weather_app
+description: Shows today's weather using the free Open-Meteo REST API.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.0
+  launchdarkly_flutter_client_sdk: ^4.21.0
+  launchdarkly_flutter_observability: ^1.0.0
+  # Same version the observability plugin uses; for trace propagation.
+  opentelemetry: ^0.18.11
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
