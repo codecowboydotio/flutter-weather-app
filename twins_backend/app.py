@@ -60,6 +60,26 @@ JUDGE_MAX_TOKENS = 4000
 log = logging.getLogger("twins")
 logging.basicConfig(level=logging.INFO)
 
+
+class _IgnoreJudgeRunnerWarnings(logging.Filter):
+    """Drops the AI SDK's warnings about not finding a judge runner.
+
+    agent_config() builds the SDK's own judge evaluator whenever the variation
+    has judges attached. Its runners only cover OpenAI and LangChain, so for
+    an Anthropic judge it warns on every request. That evaluator is never
+    used: run_judges() calls Claude itself.
+    """
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        message = record.getMessage()
+        return not (
+            message == "All providers failed or are unavailable"
+            or message.startswith("Could not load provider 'langchain'")
+        )
+
+
+logging.getLogger("ldclient.util").addFilter(_IgnoreJudgeRunnerWarnings())
+
 client = anthropic.Anthropic()
 http = httpx.Client(timeout=20)
 
