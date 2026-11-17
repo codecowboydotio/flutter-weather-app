@@ -20,6 +20,7 @@ abstract final class FlagKeys {
   static const sessionReplayButton = 'flutter_app_session_replay_button';
   static const contextTile = 'flutter_app_context_tile';
   static const weatherTwins = 'flutter_app_weather_twins';
+  static const loginButtonColor = 'flutter_app_login_button_color';
 }
 
 /// Value used when LaunchDarkly is unconfigured or unreachable, so the app
@@ -170,6 +171,29 @@ class _FeatureFlagBuilderState extends State<FeatureFlagBuilder> {
 
   @override
   Widget build(BuildContext context) => widget.builder(context, _isOn);
+}
+
+/// Rebuilds whenever string flag [flagKey] changes and passes its value to
+/// [builder]. Uses [fallback] when LaunchDarkly is unconfigured or unreachable.
+class StringFlagBuilder extends StatelessWidget {
+  final String flagKey;
+  final String fallback;
+  final Widget Function(BuildContext context, String value) builder;
+
+  const StringFlagBuilder(
+      {super.key,
+      required this.flagKey,
+      required this.fallback,
+      required this.builder});
+
+  @override
+  Widget build(BuildContext context) => FeatureFlagBuilder(
+        flagKeys: {flagKey},
+        builder: (context, _) => builder(
+            context,
+            LaunchDarkly.of(context)?.stringVariation(flagKey, fallback) ??
+                fallback),
+      );
 }
 
 /// Shows [child] only while [flagKey] is on.

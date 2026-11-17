@@ -388,6 +388,13 @@ class _Detail extends StatelessWidget {
 /// Logs "user1" (role: admin) in or out by re-identifying the LaunchDarkly
 /// client. Flags re-evaluate for the new context and [FeatureFlagBuilder]s
 /// rebuild on the resulting flag changes.
+/// Values of [FlagKeys.loginButtonColor] that give the button a background.
+const _loginButtonColors = {
+  'red': Colors.red,
+  'blue': Colors.blue,
+  'green': Colors.green,
+};
+
 class _LoginButton extends StatefulWidget {
   const _LoginButton();
 
@@ -415,11 +422,33 @@ class _LoginButtonState extends State<_LoginButton> {
       valueListenable: currentLdContext,
       builder: (context, ldContext, _) {
         final loggedIn = isLoggedIn(ldContext);
-        return TextButton.icon(
-          onPressed:
-              client == null || _busy ? null : () => _toggle(client, loggedIn),
-          icon: Icon(loggedIn ? Icons.logout : Icons.login),
-          label: Text(loggedIn ? 'Log out user1' : 'Log in'),
+        final onPressed =
+            client == null || _busy ? null : () => _toggle(client, loggedIn);
+        final icon = Icon(loggedIn ? Icons.logout : Icons.login);
+        final label = Text(loggedIn ? 'Log out user1' : 'Log in');
+        // Background colour comes from [FlagKeys.loginButtonColor]. Updates
+        // live. "default" or an unknown value keeps the plain text button.
+        return StringFlagBuilder(
+          flagKey: FlagKeys.loginButtonColor,
+          fallback: 'default',
+          builder: (context, value) {
+            final color = _loginButtonColors[value];
+            return color == null
+                ? TextButton.icon(
+                    onPressed: onPressed,
+                    icon: icon,
+                    label: label,
+                  )
+                : FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: color,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: onPressed,
+                    icon: icon,
+                    label: label,
+                  );
+          },
         );
       },
     );
